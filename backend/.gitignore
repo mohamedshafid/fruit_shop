@@ -1,0 +1,20 @@
+# dependencies
+/node_modules
+
+# environment variables
+.env
+
+# logs
+logs
+*.log
+npm-debug.log*
+
+# operating system files
+.DS_Store
+
+# editor files
+.vscode/
+.idea/
+
+# compiled output (if any)
+/dist
