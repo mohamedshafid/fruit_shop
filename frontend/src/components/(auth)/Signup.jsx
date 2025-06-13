@@ -1,15 +1,63 @@
 import { Mail, User, Lock, X } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useAppContext } from "../../contexts/AppContext";
 
 const Signup = () => {
+  // this is for the zod schema.
+  const signUpSchema = z.object({
+    username: z
+      .string()
+      .min(3, "Username must be at least 3 characters long.")
+      .max(20, "Username must be at most 20 characters long.")
+      .regex(
+        /^[a-zA-Z0-9_]+$/,
+        "Username can only contain letters, numbers, and underscores."
+      ),
+
+    email: z
+      .string()
+      .email("Please enter a valid email address.")
+      .regex(
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+        "Email must be a valid email address."
+      ),
+
+    password: z
+      .string()
+      .min(6, "Password must be at least 6 characters long.")
+      .max(50, "Password must be at most 50 characters long."),
+  });
+
+  // Using react-hook-form for form handling
+  const {
+    register,
+    formState: { errors },
+    reset,
+    handleSubmit,
+  } = useForm({
+    resolver: zodResolver(signUpSchema),
+  });
+
   // app context.
-  const { setFormType , toggleAuthModal } = useAppContext();
+  const { setFormType, toggleAuthModal } = useAppContext();
+
+  // Handle form submission
+  const onSubmit = async (data) => {
+    try {
+      console.log("Form submitted:", data);
+    } catch (error) {
+      console.error("Error during signup:", error);
+    }
+  };
+
   return (
-    <div className="w-full h-screen flex-center absolute top-0 left-0 z-100 bg-black/50">
-      <div className="bg-white rounded-lg p-8 max-w-xl w-full">
+    <div className="absolute top-0 left-0 w-full h-screen bg-black/50 z-100 flex-center">
+      <div className="w-full max-w-xl p-8 bg-white rounded-lg">
         <div className="flex items-center justify-between mb-6">
           <div>
-            <h1 className="font-bold text-3xl">
+            <h1 className="text-3xl font-bold">
               Create <span>An Account</span>
             </h1>
             <p className="text-gray-400 font-normal">
@@ -18,20 +66,19 @@ const Signup = () => {
           </div>
           <X className="cursor-pointer" onClick={() => toggleAuthModal()} />
         </div>
-        <form action="">
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-4">
             <label
               htmlFor="username"
-              className="block text-sm text-gray-700 font-semibold"
+              className="block text-sm font-semibold text-gray-700"
             >
               Username
             </label>
-            <div className="w-full relative">
+            <div className="relative w-full">
               <input
+                {...register("username")}
                 type="text"
-                id="username"
                 name="username"
-                required
                 className="input"
               />
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -46,12 +93,11 @@ const Signup = () => {
             >
               Email
             </label>
-            <div className="w-full relative">
+            <div className="relative w-full">
               <input
+                {...register("email")}
                 type="email"
-                id="email"
                 name="email"
-                required
                 className="input"
               />
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -66,12 +112,11 @@ const Signup = () => {
             >
               Password
             </label>
-            <div className="w-full relative">
+            <div className="relative w-full">
               <input
+                {...register("password")}
                 type="password"
-                id="password"
                 name="password"
-                required
                 className="input"
               />
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -81,7 +126,7 @@ const Signup = () => {
           </div>
           <button
             type="submit"
-            className="w-full bg-accent text-white py-2 rounded-md"
+            className="w-full py-2 text-white bg-accent rounded-md"
           >
             Sign Up
           </button>
@@ -90,7 +135,7 @@ const Signup = () => {
           <p className="text-sm text-gray-600">
             Already have an account?{" "}
             <a
-              className="text-accent hover:underline cursor-pointer"
+              className="cursor-pointer text-accent hover:underline"
               onClick={() => setFormType("signin")}
             >
               Log In

@@ -1,7 +1,47 @@
 import { Mail, Lock, X } from "lucide-react";
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
 import { useAppContext } from "../../contexts/AppContext";
 
 const SignIn = () => {
+  // this is for the zod schema.
+  const signInSchema = z.object({
+    email: z
+      .string()
+      .email("Please enter a valid email address.")
+      .regex(
+        /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/,
+        "Email must be a valid email address."
+      ),
+    password: z
+      .string()
+      .min(6, "Password must be at least 6 characters long.")
+      .max(50, "Password must be at most 50 characters long."),
+  });
+
+  // Using react-hook-form for form handling
+  const {
+    register,
+    formState: { errors },
+    reset,
+    handleSubmit,
+  } = useForm({
+    resolver: zodResolver(signInSchema),
+  });
+
+  // Handle form submission
+  const onSubmit = async (data) => {
+    try {
+      console.log("Form submitted:", data);
+      reset();
+      toggleAuthModal();
+      // Here you would typically send the data to your backend for authentication
+    } catch (error) {
+      console.error("Error during signin:", error);
+    }
+  };
+
   // app context.
   const { setFormType, toggleAuthModal } = useAppContext();
   return (
@@ -11,10 +51,10 @@ const SignIn = () => {
           <h1 className="font-bold text-3xl">
             Welcome <span>Buddy</span>
           </h1>
-          <X className="cursor-pointer" onClick={()=>toggleAuthModal()}/>
+          <X className="cursor-pointer" onClick={() => toggleAuthModal()} />
         </div>
         <p className="mb-10 text-gray-400 font-normal">Ready to Get Back In</p>
-        <form action="">
+        <form onSubmit={handleSubmit(onSubmit)}>
           <div className="mb-4">
             <label
               htmlFor="email"
@@ -24,10 +64,9 @@ const SignIn = () => {
             </label>
             <div className="w-full relative">
               <input
+                {...register("email")}
                 type="email"
-                id="email"
                 name="email"
-                required
                 className="input"
               />
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
@@ -44,10 +83,9 @@ const SignIn = () => {
             </label>
             <div className="w-full relative">
               <input
+                {...register("password")}
                 type="password"
-                id="password"
                 name="password"
-                required
                 className="input"
               />
               <span className="absolute inset-y-0 left-0 flex items-center pl-3 pointer-events-none">
